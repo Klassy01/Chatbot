@@ -18,6 +18,7 @@ export default function App() {
   const { isAuthenticated } = useAuth();
   const [showSignUp, setShowSignUp] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [chats, setChats] = useState<Chat[]>([
     {
       id: "1",
@@ -26,7 +27,9 @@ export default function App() {
       updatedAt: new Date(),
     },
   ]);
+
   const [activeChatId, setActiveChatId] = useState<string>("1");
+
   const [messages, setMessages] = useState<Record<string, Message[]>>({
     "1": [
       {
@@ -55,7 +58,7 @@ export default function App() {
     }));
   };
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     if (!content.trim() || !activeChatId) return;
 
     const userMessage: Message = {
@@ -78,10 +81,21 @@ export default function App() {
       )
     );
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: activeChatId, // use chat ID to separate history
+          message: content,
+        }),
+      });
+
+      const data = await res.json();
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm DeepSeek Chat. How can I assist you further?",
+        content: data.response || "No response from DeepSeek.",
         role: "assistant",
         timestamp: new Date(),
       };
@@ -90,7 +104,19 @@ export default function App() {
         ...prev,
         [activeChatId]: [...(prev[activeChatId] || []), botMessage],
       }));
-    }, 1000);
+    } catch (err) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "⚠️ Error contacting DeepSeek API.",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => ({
+        ...prev,
+        [activeChatId]: [...(prev[activeChatId] || []), errorMessage],
+      }));
+    }
   };
 
   if (!isAuthenticated) {

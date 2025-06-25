@@ -1,17 +1,17 @@
-import type { Message } from '../types/types';
 import MessageComponent from './Message';
 import ChatInput from './ChatInput';
+import type { Message } from '../types/types';
 
 interface ChatContainerProps {
   messages: Message[];
-  onSendMessage: (content: string) => void;
+  onSendMessage: (msg: string) => void;
   isSidebarOpen: boolean;
 }
 
-export default function ChatContainer({ 
-  messages, 
+export default function ChatContainer({
+  messages,
   onSendMessage,
-  isSidebarOpen 
+  isSidebarOpen
 }: ChatContainerProps) {
   return (
     <div

@@ -9,10 +9,9 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   const [input, setInput] = useState('');
 
   const handleSend = () => {
-    if (input.trim()) {
-      onSend(input);
-      setInput('');
-    }
+    if (!input.trim()) return;
+    onSend(input.trim());
+    setInput('');
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
